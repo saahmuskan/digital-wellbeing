@@ -172,6 +172,49 @@ export function loginUser({ name, email, password }) {
   return toPublicUser(user);
 }
 
+export function registerUser({ name, email, password }) {
+  ensureDefaultAdmins();
+
+  const cleanEmail = normalizeEmail(email);
+  const cleanPassword = (password || "").trim();
+
+  if (!isAllowedEmailDomain(cleanEmail)) {
+    throw new Error("INVALID_EMAIL_DOMAIN");
+  }
+
+  if (!cleanEmail) {
+    throw new Error("Email is required");
+  }
+  if (!cleanPassword) {
+    throw new Error("Password is required");
+  }
+
+  const userId = createUserId(cleanEmail);
+  const users = JSON.parse(localStorage.getItem(USERS_KEY) || "{}");
+
+  if (users[userId]?.id) {
+    throw new Error("USER_EXISTS");
+  }
+
+  const cleanName = (name || cleanEmail.split("@")[0] || "Wellness User").trim();
+  const user = {
+    id: userId,
+    email: cleanEmail,
+    name: cleanName,
+    role: "user",
+    adminLevel: null,
+    password: cleanPassword,
+    createdAt: new Date().toISOString(),
+    lastLoginAt: new Date().toISOString(),
+  };
+
+  users[userId] = user;
+  localStorage.setItem(USERS_KEY, JSON.stringify(users));
+  localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(toPublicUser(user)));
+
+  return toPublicUser(user);
+}
+
 export function logoutUser() {
   localStorage.removeItem(CURRENT_USER_KEY);
 }

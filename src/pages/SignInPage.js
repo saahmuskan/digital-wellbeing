@@ -1,11 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import SignInCreateAccountButton from "../components/SignInCreateAccountButton";
 
-function LoginPage() {
+function SignInPage() {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { signup } = useAuth();
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
 
@@ -23,26 +22,26 @@ function LoginPage() {
     }
 
     try {
-      login({ email: form.email, password: form.password });
-      navigate("/", { replace: true });
+      signup({ email: form.email, password: form.password });
+      navigate("/login", { replace: true });
     } catch (err) {
       if (err.message === "INVALID_EMAIL_DOMAIN") {
         setError("Only @gmail.com email addresses are allowed.");
         return;
       }
-      if (err.message === "INVALID_CREDENTIALS") {
-        setError("Incorrect password for this email.");
+      if (err.message === "USER_EXISTS") {
+        setError("Account already exists. Please login instead.");
         return;
       }
-      setError("Unable to sign in. Please try again.");
+      setError("Unable to create account. Please try again.");
     }
   };
 
   return (
     <div className="auth-wrap">
       <div className="auth-card">
-        <h2>Welcome to Wellify</h2>
-        <p>Use your email and password to keep your weekly wellness data personal.</p>
+        <h2>Create Your Account</h2>
+        <p>Sign in with your email and password to start your wellness journey.</p>
 
         <form onSubmit={handleSubmit}>
           <div className="field">
@@ -62,7 +61,7 @@ function LoginPage() {
             <input
               name="password"
               type="password"
-              placeholder="Enter password"
+              placeholder="Create password"
               value={form.password}
               onChange={handleChange}
               required
@@ -71,15 +70,12 @@ function LoginPage() {
 
           {error ? <div className="auth-error">{error}</div> : null}
 
-          <button type="submit" className="submit-btn">
-            Login and Continue
-          </button>
-
-          <SignInCreateAccountButton onClick={() => navigate("/signin")} />
+          <button type="submit" className="submit-btn">Create Account and Continue</button>
+          <button type="button" className="auth-signin-minimal" onClick={() => navigate("/login")}>Back to Login</button>
         </form>
       </div>
     </div>
   );
 }
 
-export default LoginPage;
+export default SignInPage;

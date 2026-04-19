@@ -9,6 +9,7 @@ import {
   isAdminRole,
   loginUser as persistLoginUser,
   logoutUser as persistLogoutUser,
+  registerUser as persistRegisterUser,
   promoteUserToAdmin,
 } from "../utils/auth";
 
@@ -27,6 +28,11 @@ export function AuthProvider({ children }) {
     user,
     login: (credentials) => {
       const nextUser = persistLoginUser(credentials);
+      setUser(nextUser);
+      return nextUser;
+    },
+    signup: (credentials) => {
+      const nextUser = persistRegisterUser(credentials);
       setUser(nextUser);
       return nextUser;
     },

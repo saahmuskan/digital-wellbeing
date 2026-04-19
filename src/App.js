@@ -6,6 +6,7 @@ import AppointmentPage from "./pages/AppoinmentPage";
 import BlogPage from "./pages/Blogpage";
 import ProfilePage from "./pages/ProfilePage";
 import LoginPage from "./pages/LoginPage";
+import SignInPage from "./pages/SignInPage";
 import AdminUsersPage from "./pages/AdminUsersPage";
 import AdminBookedSlotsPage from "./pages/AdminBookedSlotsPage";
 import Navbar from "./components/Navbar";
@@ -45,6 +46,10 @@ function AppShell() {
         <Route
           path="/login"
           element={user ? <Navigate to="/" replace /> : <LoginPage />}
+        />
+        <Route
+          path="/signin"
+          element={user ? <Navigate to="/dashboard" replace /> : <SignInPage />}
         />
         <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
         <Route path="/assessment" element={<ProtectedRoute><AssessmentPage /></ProtectedRoute>} />
