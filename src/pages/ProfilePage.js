@@ -1,4 +1,5 @@
 import { getCurrentUser, getStorageKeyForCurrentUser } from "../utils/auth";
+import { FiTrendingUp, FiTarget } from "react-icons/fi";
 
 function getGoalMeta(score) {
   if (score >= 7) return { badge: "good", status: "On track" };
@@ -58,7 +59,7 @@ function ProfilePage() {
  
       {/* History table */}
       <div className="dash-panel" style={{ marginBottom: 20 }}>
-        <h3>📈 Progress Tracking</h3>
+        <h3><FiTrendingUp aria-hidden="true" /> Progress Tracking</h3>
         <p style={{ fontSize: 13, color: "var(--text-2)", marginBottom: 16 }}>
           Your wellness score trend over time.
         </p>
@@ -93,7 +94,7 @@ function ProfilePage() {
  
       {/* Goals */}
       <div className="dash-panel">
-        <h3>🎯 Goals</h3>
+        <h3><FiTarget aria-hidden="true" /> Goals</h3>
         <div className="goals-list">
           {goals.map((g) => (
             <div key={g.label} className="goal-row">

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { FiTrendingUp, FiBriefcase, FiCalendar } from "react-icons/fi";
 import MoodBanner from "./MoodUI";
 import { getAllUsers, getCurrentUser, getStorageKeyForCurrentUser, getStorageKeyForUser } from "../utils/auth";
  
@@ -290,7 +291,7 @@ function Dashboard({ scores }) {
  
       {/* Bar chart */}
       <div className="dash-panel">
-        <h3>📈 Score Breakdown</h3>
+        <h3><FiTrendingUp aria-hidden="true" /> Score Breakdown</h3>
         {SCORE_KEYS.map((k) => (
           <BarRow
             key={k}
@@ -303,7 +304,7 @@ function Dashboard({ scores }) {
  
       {/* Org wellness */}
       <div className="dash-panel">
-        <h3>🏢 Organisation Wellness Index</h3>
+        <h3><FiBriefcase aria-hidden="true" /> Organisation Wellness Index</h3>
         <p style={{ fontSize: 13, color: "var(--text-2)", marginBottom: 16 }}>
           Based on aggregated team wellness data — shows workforce health trends.
         </p>
@@ -345,7 +346,7 @@ function Dashboard({ scores }) {
               aria-label="Show monthly progress"
               title="Show monthly progress"
             >
-              📆
+              <FiCalendar aria-hidden="true" />
             </button>
           </div>
         </div>

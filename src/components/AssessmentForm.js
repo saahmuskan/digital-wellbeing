@@ -1,14 +1,15 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { FiMoon, FiCpu, FiHeart, FiSun, FiSmile, FiMeh, FiAlertCircle, FiFrown } from "react-icons/fi";
 import { calculateScore } from "../utils/scoring";
 import { getCurrentUser, getStorageKeyForCurrentUser } from "../utils/auth";
  
 const MOODS = [
-  { key: "Joyful",  emoji: "😄" },
-  { key: "Happy",   emoji: "🙂" },
-  { key: "Neutral", emoji: "😐" },
-  { key: "Anxious", emoji: "😟" },
-  { key: "Sad",     emoji: "😔" },
+  { key: "Joyful", Icon: FiSun },
+  { key: "Happy", Icon: FiSmile },
+  { key: "Neutral", Icon: FiMeh },
+  { key: "Anxious", Icon: FiAlertCircle },
+  { key: "Sad", Icon: FiFrown },
 ];
  
 function AssessmentForm() {
@@ -76,7 +77,7 @@ function AssessmentForm() {
  
       {/* Physical */}
       <div className="form-section">
-        <h3>🛌 Physical Health</h3>
+        <h3><FiMoon aria-hidden="true" /> Physical Health</h3>
         <div className="form-row">
           <div className="field">
             <label>Sleep hours per night</label>
@@ -105,7 +106,7 @@ function AssessmentForm() {
  
       {/* Mental */}
       <div className="form-section">
-        <h3>🧠 Mental Health</h3>
+        <h3><FiCpu aria-hidden="true" /> Mental Health</h3>
         <div className="field">
           <label>
             Stress level today&nbsp;
@@ -141,7 +142,7 @@ function AssessmentForm() {
  
       {/* Emotional */}
       <div className="form-section">
-        <h3>💚 Emotional Health</h3>
+        <h3><FiHeart aria-hidden="true" /> Emotional Health</h3>
         <div className="field">
           <label>How are you feeling today?</label>
           <div className="mood-grid">
@@ -152,7 +153,7 @@ function AssessmentForm() {
                 className={`mood-btn${form.mood === m.key ? " selected" : ""}`}
                 onClick={() => selectMood(m.key)}
               >
-                {m.emoji}
+                <m.Icon aria-hidden="true" className="mood-btn-icon" />
                 <span>{m.key}</span>
               </button>
             ))}

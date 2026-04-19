@@ -1,9 +1,14 @@
 import { useState, useEffect } from "react";
+import { FiCompass, FiActivity, FiCoffee, FiUser, FiCalendar, FiEdit3, FiCheckCircle, FiFileText, FiMail, FiMessageCircle } from "react-icons/fi";
 import { useAuth } from "../context/AuthContext";
 import { getAllBookingsForUsers, getBookings, saveBooking, deleteBooking } from "../utils/bookings";
 import { getAllUsers, isAllowedEmailDomain } from "../utils/auth";
  
-const CONSULTANTS = ["🧘 Wellness Coach", "🧠 Therapist", "🥗 Nutritionist"];
+const CONSULTANTS = [
+  { label: "Wellness Coach", Icon: FiCompass },
+  { label: "Therapist", Icon: FiActivity },
+  { label: "Nutritionist", Icon: FiCoffee },
+];
 const TIMES = ["09:00 AM", "11:00 AM", "02:00 PM", "04:00 PM", "06:00 PM"];
 
 const WEEK_DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -144,7 +149,7 @@ function AppointmentPage() {
     setAllBookings(getAllBookingsForUsers(users));
   }, [user]);
 
-  const selectedConsultant = CONSULTANTS[consultant];
+  const selectedConsultant = CONSULTANTS[consultant]?.label;
 
   const availabilityMap = dates.reduce((acc, date) => {
     const dateKey = toDateKey(date);
@@ -258,16 +263,19 @@ function AppointmentPage() {
  
       {/* Consultant type */}
       <div className="form-section">
-        <h3>👤 Consultant type</h3>
+        <h3><FiUser aria-hidden="true" /> Consultant type</h3>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
-          {CONSULTANTS.map((c, i) => (
+          {CONSULTANTS.map((consultantItem, i) => (
             <button
-              key={c}
+              key={consultantItem.label}
               type="button"
               className={`slot-btn${consultant === i ? " selected" : ""}`}
               onClick={() => setConsultant(i)}
             >
-              <div className="slot-date">{c}</div>
+              <div className="slot-date" style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+                <consultantItem.Icon aria-hidden="true" />
+                <span>{consultantItem.label}</span>
+              </div>
             </button>
           ))}
         </div>
@@ -275,7 +283,7 @@ function AppointmentPage() {
  
       {/* Slots */}
       <div className="form-section">
-        <h3>📅 Calendar slots (next 6 months)</h3>
+        <h3><FiCalendar aria-hidden="true" /> Calendar slots (next 6 months)</h3>
         <div className="calendar-toolbar">
           <div className="field" style={{ marginBottom: 0 }}>
             <label>Select month</label>
@@ -347,7 +355,7 @@ function AppointmentPage() {
  
       {/* Details */}
       <div className="form-section">
-        <h3>📝 Your details</h3>
+        <h3><FiEdit3 aria-hidden="true" /> Your details</h3>
         <div className="form-row">
           <div className="field">
             <label>Full name</label>
@@ -386,7 +394,7 @@ function AppointmentPage() {
  
       {confirmed && (
         <div className="confirm-box">
-          <div style={{ fontSize: 40, marginBottom: 12 }}>✅</div>
+          <div style={{ fontSize: 40, marginBottom: 12, lineHeight: 1, display: "inline-flex" }} aria-hidden="true"><FiCheckCircle /></div>
           <h3>Appointment Confirmed!</h3>
           <p>
             Hi {name || "there"}, your consultation with a {selectedConsultant} is booked for{" "}
@@ -402,7 +410,7 @@ function AppointmentPage() {
       {/* Past Bookings Section */}
       {pastBookings.length > 0 && (
         <div className="form-section" style={{ marginTop: 40 }}>
-          <h3>📋 Your Bookings</h3>
+          <h3><FiFileText aria-hidden="true" /> Your Bookings</h3>
           <div style={{ display: "grid", gap: 16 }}>
             {pastBookings.map((booking) => (
               <div key={booking.id} style={{
@@ -417,17 +425,21 @@ function AppointmentPage() {
                       {booking.consultant}
                     </p>
                     <p style={{ margin: "4px 0", fontSize: 14, color: "#666" }}>
-                      📅 {booking.slot?.label} at {booking.slot?.time}
+                      <FiCalendar aria-hidden="true" style={{ marginRight: 6, verticalAlign: "-2px" }} />
+                      {booking.slot?.label} at {booking.slot?.time}
                     </p>
                     <p style={{ margin: "4px 0", fontSize: 14, color: "#666" }}>
-                      👤 {booking.name}
+                      <FiUser aria-hidden="true" style={{ marginRight: 6, verticalAlign: "-2px" }} />
+                      {booking.name}
                     </p>
                     <p style={{ margin: "4px 0", fontSize: 14, color: "#666" }}>
-                      📧 {booking.email}
+                      <FiMail aria-hidden="true" style={{ marginRight: 6, verticalAlign: "-2px" }} />
+                      {booking.email}
                     </p>
                     {booking.notes && (
                       <p style={{ margin: "4px 0", fontSize: 14, color: "#666", fontStyle: "italic" }}>
-                        💬 {booking.notes}
+                        <FiMessageCircle aria-hidden="true" style={{ marginRight: 6, verticalAlign: "-2px" }} />
+                        {booking.notes}
                       </p>
                     )}
                   </div>

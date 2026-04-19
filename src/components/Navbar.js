@@ -3,27 +3,40 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { isAdminRole } from "../utils/auth";
+import {
+  FiHome,
+  FiClipboard,
+  FiBarChart2,
+  FiCalendar,
+  FiBookOpen,
+  FiUser,
+  FiTool,
+  FiFileText,
+  FiFeather,
+  FiMenu,
+  FiX,
+} from "react-icons/fi";
  
 const links = [
-  { to: "/",            label: "Home",       icon: "🏠" },
-  { to: "/assessment",  label: "Assessment", icon: "📝" },
-  { to: "/dashboard",   label: "Dashboard",  icon: "📊" },
-  { to: "/appointment", label: "Book",       icon: "📅" },
-  { to: "/blog",        label: "Blog",       icon: "📚" },
-  { to: "/profile",     label: "Profile",    icon: "👤" },
+  { to: "/", label: "Home", icon: FiHome },
+  { to: "/assessment", label: "Assessment", icon: FiClipboard },
+  { to: "/dashboard", label: "Dashboard", icon: FiBarChart2 },
+  { to: "/appointment", label: "Book", icon: FiCalendar },
+  { to: "/blog", label: "Blog", icon: FiBookOpen },
+  { to: "/profile", label: "Profile", icon: FiUser },
 ];
 
 const adminLinks = [
-  { to: "/admin/users", label: "Users", icon: "🛠️" },
-  { to: "/admin/booked-slots", label: "Booked Slots", icon: "📋" },
+  { to: "/admin/users", label: "Users", icon: FiTool },
+  { to: "/admin/booked-slots", label: "Booked Slots", icon: FiFileText },
 ];
 
 const mobileBottomLinks = [
-  { to: "/", label: "Home", icon: "🏠" },
-  { to: "/assessment", label: "Assess", icon: "📝" },
-  { to: "/dashboard", label: "Dash", icon: "📊" },
-  { to: "/appointment", label: "Book", icon: "📅" },
-  { to: "/profile", label: "Profile", icon: "👤" },
+  { to: "/", label: "Home", icon: FiHome },
+  { to: "/assessment", label: "Assess", icon: FiClipboard },
+  { to: "/dashboard", label: "Dash", icon: FiBarChart2 },
+  { to: "/appointment", label: "Book", icon: FiCalendar },
+  { to: "/profile", label: "Profile", icon: FiUser },
 ];
  
 function Navbar() {
@@ -43,7 +56,7 @@ function Navbar() {
     <>
       <nav className="navbar">
         <NavLink to="/" className="nav-logo">
-          <span>🌿</span> Wellify
+          <span className="nav-logo-icon" aria-hidden="true"><FiFeather /></span> Wellify
         </NavLink>
 
         <button
@@ -52,7 +65,7 @@ function Navbar() {
           aria-label="Toggle navigation menu"
           onClick={() => setMobileOpen((prev) => !prev)}
         >
-          {mobileOpen ? "✕" : "☰"}
+          {mobileOpen ? <FiX aria-hidden="true" /> : <FiMenu aria-hidden="true" />}
         </button>
  
         <div className={`nav-links${mobileOpen ? " mobile-open" : ""}`}>
@@ -64,7 +77,9 @@ function Navbar() {
               className={({ isActive }) => "nav-link" + (isActive ? " active" : "")}
               onClick={() => setMobileOpen(false)}
             >
-              <span className="nav-link-icon" aria-hidden="true">{l.icon}</span>
+              <span className="nav-link-icon" aria-hidden="true">
+                <l.icon />
+              </span>
               {l.label}
             </NavLink>
           ))}
@@ -92,7 +107,9 @@ function Navbar() {
             end={l.to === "/"}
             className={({ isActive }) => "mobile-bottom-link" + (isActive ? " active" : "")}
           >
-            <span className="mobile-bottom-icon" aria-hidden="true">{l.icon}</span>
+            <span className="mobile-bottom-icon" aria-hidden="true">
+              <l.icon />
+            </span>
             <span>{l.label}</span>
           </NavLink>
         ))}

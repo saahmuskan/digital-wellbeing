@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Navigate } from "react-router-dom";
+import { FiBarChart2, FiTrendingUp, FiFileText, FiCalendar, FiCheckCircle, FiInfo } from "react-icons/fi";
 import { useAuth } from "../context/AuthContext";
 import { isAdminRole, getStorageKeyForUser } from "../utils/auth";
 
@@ -460,7 +461,8 @@ function AdminUsersPage() {
             onClick={(e) => e.stopPropagation()}
           >
             <h3 style={{ marginBottom: 16 }}>
-              📊 Delete Data for {dataPreviewUser.name}
+              <FiBarChart2 aria-hidden="true" style={{ marginRight: 8, verticalAlign: "-2px" }} />
+              Delete Data for {dataPreviewUser.name}
             </h3>
             <p style={{ color: "var(--text-2)", fontSize: 13, marginBottom: 18 }}>
               Select which data you want to delete. This action cannot be undone.
@@ -476,7 +478,7 @@ function AdminUsersPage() {
                     style={{ cursor: "pointer", width: 18, height: 18 }}
                   />
                   <div>
-                    <div style={{ fontWeight: 500 }}>📈 Wellness Scores</div>
+                    <div style={{ fontWeight: 500 }}><FiTrendingUp aria-hidden="true" style={{ marginRight: 6, verticalAlign: "-2px" }} />Wellness Scores</div>
                     <div style={{ fontSize: 12, color: "var(--text-3)" }}>
                       Latest assessment score ({userDataBreakdown.scores} record)
                     </div>
@@ -493,7 +495,7 @@ function AdminUsersPage() {
                     style={{ cursor: "pointer", width: 18, height: 18 }}
                   />
                   <div>
-                    <div style={{ fontWeight: 500 }}>📋 Assessment History</div>
+                    <div style={{ fontWeight: 500 }}><FiFileText aria-hidden="true" style={{ marginRight: 6, verticalAlign: "-2px" }} />Assessment History</div>
                     <div style={{ fontSize: 12, color: "var(--text-3)" }}>
                       All past assessments ({userDataBreakdown.history} records)
                     </div>
@@ -510,7 +512,7 @@ function AdminUsersPage() {
                     style={{ cursor: "pointer", width: 18, height: 18 }}
                   />
                   <div>
-                    <div style={{ fontWeight: 500 }}>📅 Appointment Bookings</div>
+                    <div style={{ fontWeight: 500 }}><FiCalendar aria-hidden="true" style={{ marginRight: 6, verticalAlign: "-2px" }} />Appointment Bookings</div>
                     <div style={{ fontSize: 12, color: "var(--text-3)" }}>
                       All booked consultation slots ({userDataBreakdown.bookings} records)
                     </div>
@@ -571,7 +573,9 @@ function AdminUsersPage() {
             onClick={(e) => e.stopPropagation()}
           >
             <div style={{ fontSize: 40, marginBottom: 16, lineHeight: 1 }}>
-              {message.includes("deleted") || message.includes("removed") || message.includes("confirmed") ? "✅" : "ℹ️"}
+              {message.includes("deleted") || message.includes("removed") || message.includes("confirmed")
+                ? <FiCheckCircle aria-hidden="true" />
+                : <FiInfo aria-hidden="true" />}
             </div>
             <p style={{ color: "var(--text)", fontSize: 16, lineHeight: 1.8, fontWeight: 500, marginBottom: 20 }}>
               {message}

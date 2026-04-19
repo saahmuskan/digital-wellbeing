@@ -1,12 +1,13 @@
 import { useNavigate } from "react-router-dom";
+import { FiBarChart2, FiCpu, FiCalendar, FiBriefcase, FiBookOpen, FiMessageCircle } from "react-icons/fi";
  
 const FEATURES = [
-  { icon: "📊", title: "Smart Scoring",        desc: "Get precise physical, mental and emotional wellness scores based on your daily habits." },
-  { icon: "🤖", title: "AI Recommendations",   desc: "Receive personalised tips and actionable steps tailored to your unique score profile." },
-  { icon: "📅", title: "Book Consultations",    desc: "Schedule one-on-one wellness sessions with certified coaches at your convenience." },
-  { icon: "🏢", title: "Organisation Wellness", desc: "Measure and improve team wellbeing with our company wellness index and workforce insights." },
-  { icon: "📚", title: "Knowledge Hub",         desc: "Access curated articles on mental health, nutrition, sleep science and holistic lifestyle." },
-  { icon: "💬", title: "AI Assistant",          desc: "Chat anytime with our wellness assistant for instant advice, tips and emotional support." },
+  { icon: FiBarChart2, title: "Smart Scoring", desc: "Get precise physical, mental and emotional wellness scores based on your daily habits." },
+  { icon: FiCpu, title: "AI Recommendations", desc: "Receive personalised tips and actionable steps tailored to your unique score profile." },
+  { icon: FiCalendar, title: "Book Consultations", desc: "Schedule one-on-one wellness sessions with certified coaches at your convenience." },
+  { icon: FiBriefcase, title: "Organisation Wellness", desc: "Measure and improve team wellbeing with our company wellness index and workforce insights." },
+  { icon: FiBookOpen, title: "Knowledge Hub", desc: "Access curated articles on mental health, nutrition, sleep science and holistic lifestyle." },
+  { icon: FiMessageCircle, title: "AI Assistant", desc: "Chat anytime with our wellness assistant for instant advice, tips and emotional support." },
 ];
  
 const TRUST = [
@@ -45,7 +46,7 @@ function Home() {
       <div className="features-grid">
         {FEATURES.map((f) => (
           <div key={f.title} className="feature-card">
-            <div className="feature-icon">{f.icon}</div>
+            <div className="feature-icon" aria-hidden="true"><f.icon /></div>
             <h3>{f.title}</h3>
             <p>{f.desc}</p>
           </div>

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Navigate } from "react-router-dom";
+import { FiSliders, FiSearch, FiUser, FiCalendar, FiCheck, FiRotateCcw } from "react-icons/fi";
 import { useAuth } from "../context/AuthContext";
 import { getAllBookingsForUsers } from "../utils/bookings";
 import { isAdminRole } from "../utils/auth";
@@ -155,10 +156,10 @@ function AdminBookedSlotsPage() {
       </div>
 
       <div className="dash-panel" style={{ marginBottom: 16, background: "white", border: "1px solid rgba(26,92,58,0.08)" }}>
-        <h3 style={{ fontSize: 16, marginBottom: 18, display: "flex", alignItems: "center", gap: 8 }}>⚙️ Filter Slots</h3>
+        <h3 style={{ fontSize: 16, marginBottom: 18, display: "flex", alignItems: "center", gap: 8 }}><FiSliders aria-hidden="true" /> Filter Slots</h3>
         <div className="form-row">
           <div className="field" style={{ marginBottom: 0 }}>
-            <label style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 8 }}>🔍 Search user</label>
+            <label style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 8 }}><FiSearch aria-hidden="true" /> Search user</label>
             <input
               type="text"
               placeholder="Enter name or email"
@@ -168,7 +169,7 @@ function AdminBookedSlotsPage() {
             />
           </div>
           <div className="field" style={{ marginBottom: 0 }}>
-            <label style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 8 }}>👤 Consultant</label>
+            <label style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 8 }}><FiUser aria-hidden="true" /> Consultant</label>
             <select value={consultantFilter} onChange={(e) => setConsultantFilter(e.target.value)}>
               <option value="all">All consultants</option>
               {consultantOptions.map((consultant) => (
@@ -179,7 +180,7 @@ function AdminBookedSlotsPage() {
         </div>
         <div className="form-row">
           <div className="field" style={{ marginBottom: 0 }}>
-            <label style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 8 }}>📅 Date</label>
+            <label style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 8 }}><FiCalendar aria-hidden="true" /> Date</label>
             <input
               type="date"
               value={dateFilter}
@@ -187,7 +188,7 @@ function AdminBookedSlotsPage() {
             />
           </div>
           <div className="field" style={{ marginBottom: 0 }}>
-            <label style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 8 }}>✓ Status</label>
+            <label style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 8 }}><FiCheck aria-hidden="true" /> Status</label>
             <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
               <option value="all">All</option>
               <option value="upcoming">Upcoming only</option>
@@ -206,7 +207,8 @@ function AdminBookedSlotsPage() {
           }}
           style={{ marginTop: 16, background: "rgba(26,92,58,0.06)", border: "1.5px solid var(--green-light)" }}
         >
-          ↻ Clear Filters
+          <FiRotateCcw aria-hidden="true" style={{ marginRight: 6, verticalAlign: "-2px" }} />
+          Clear Filters
         </button>
       </div>
 
