@@ -66,6 +66,10 @@ function LoginPage() {
         setError("Incorrect password for this email.");
         return;
       }
+      if (err.message === "USER_NOT_FOUND") {
+        setError("No account found for this email. Please create an account first.");
+        return;
+      }
       if (err.message === "USER_EXISTS") {
         setError("Account already exists. Please login instead.");
         return;

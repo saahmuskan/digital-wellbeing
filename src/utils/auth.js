@@ -150,7 +150,11 @@ export function loginUser({ name, email, password }) {
   const users = JSON.parse(localStorage.getItem(USERS_KEY) || "{}");
   const existing = users[userId] || {};
 
-  if (existing.id && existing.password && existing.password !== cleanPassword) {
+  if (!existing.id) {
+    throw new Error("USER_NOT_FOUND");
+  }
+
+  if (!existing.password || existing.password !== cleanPassword) {
     throw new Error("INVALID_CREDENTIALS");
   }
 
@@ -160,7 +164,7 @@ export function loginUser({ name, email, password }) {
     name: existing.name || cleanName,
     role: normalizeRole(existing.role),
     adminLevel: normalizeAdminLevel(userId, existing.role, existing.adminLevel),
-    password: existing.password || cleanPassword,
+    password: existing.password,
     createdAt: existing.createdAt || new Date().toISOString(),
     lastLoginAt: new Date().toISOString(),
   };
