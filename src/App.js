@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Home from "./pages/Home";
 import AssessmentPage from "./pages/AssessmentPage";
@@ -13,6 +14,7 @@ import Navbar from "./components/Navbar";
 import Chatbot from "./components/Chatbot";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { isAdminRole } from "./utils/auth";
+import { applyTheme, getSavedTheme } from "./utils/themes";
 import "./styles/main.css";
 
 function ProtectedRoute({ children }) {
@@ -27,6 +29,10 @@ function AdminRoute({ children }) {
 }
 
 function App() {
+  useEffect(() => {
+    applyTheme(getSavedTheme());
+  }, []);
+
   return (
     <AuthProvider>
       <Router>

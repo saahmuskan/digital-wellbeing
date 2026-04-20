@@ -197,6 +197,7 @@ export function registerUser({ name, email, password }) {
   }
 
   const cleanName = (name || cleanEmail.split("@")[0] || "Wellness User").trim();
+
   const user = {
     id: userId,
     email: cleanEmail,

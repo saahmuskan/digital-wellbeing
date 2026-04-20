@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { isAdminRole } from "../utils/auth";
+import ThemeSwitcher from "./ThemeSwitcher";
 import {
   FiHome,
   FiClipboard,
@@ -12,7 +13,6 @@ import {
   FiUser,
   FiTool,
   FiFileText,
-  FiFeather,
   FiMenu,
   FiX,
 } from "react-icons/fi";
@@ -56,7 +56,12 @@ function Navbar() {
     <>
       <nav className="navbar">
         <NavLink to="/" className="nav-logo">
-          <span className="nav-logo-icon" aria-hidden="true"><FiFeather /></span> Wellify
+          <span className="nav-logo-mark" aria-hidden="true">
+            <span className="logo-orb" />
+            <span className="logo-ring" />
+            <span className="logo-spark" />
+          </span>
+          <span className="nav-logo-text">Wellify</span>
         </NavLink>
 
         <button
@@ -77,22 +82,18 @@ function Navbar() {
               className={({ isActive }) => "nav-link" + (isActive ? " active" : "")}
               onClick={() => setMobileOpen(false)}
             >
-              <span className="nav-link-icon" aria-hidden="true">
-                <l.icon />
-              </span>
               {l.label}
             </NavLink>
           ))}
         </div>
 
         <div className="nav-actions">
-          <NavLink to="/assessment" className="btn-primary nav-assess" onClick={() => setMobileOpen(false)}>
-            Start Assessment
-          </NavLink>
+          <ThemeSwitcher />
 
           <div className="nav-user">
+            <span className="nav-user-icon" aria-hidden="true"><FiUser /></span>
             <span className="nav-user-name">{user?.name || "User"}</span>
-            <button type="button" className="btn-outline nav-logout" onClick={handleLogout}>
+            <button type="button" className="nav-logout-link" onClick={handleLogout}>
               Logout
             </button>
           </div>
