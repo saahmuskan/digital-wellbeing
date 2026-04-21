@@ -1,9 +1,132 @@
 import { useEffect, useMemo, useState } from "react";
-import { FiTrendingUp, FiBriefcase, FiCalendar } from "react-icons/fi";
+import { FiTrendingUp, FiBriefcase, FiCalendar, FiFeather } from "react-icons/fi";
 import MoodBanner from "./MoodUI";
 import { getAllUsers, getCurrentUser, getStorageKeyForCurrentUser, getStorageKeyForUser } from "../utils/auth";
  
 const SCORE_KEYS = ["physical", "mental", "emotional", "overall"];
+
+function toDateKey(date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+function getEntryDateKey(entry) {
+  if (entry?.timestamp) {
+    const parsed = new Date(entry.timestamp);
+    if (!Number.isNaN(parsed.getTime())) return toDateKey(parsed);
+  }
+
+  if (entry?.date) {
+    const raw = String(entry.date).trim();
+    const parsed = new Date(raw);
+    if (!Number.isNaN(parsed.getTime())) return toDateKey(parsed);
+
+    // Handle common date strings like 21/04/2026 or 21-04-2026.
+    const slashOrDash = raw.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{2,4})$/);
+    if (slashOrDash) {
+      const day = Number(slashOrDash[1]);
+      const month = Number(slashOrDash[2]);
+      const year = Number(slashOrDash[3].length === 2 ? `20${slashOrDash[3]}` : slashOrDash[3]);
+      const rebuilt = new Date(year, month - 1, day);
+      if (!Number.isNaN(rebuilt.getTime())) return toDateKey(rebuilt);
+    }
+
+    const dayMonthText = raw.match(/^(\d{1,2})\s+([A-Za-z]{3,})\s+(\d{4})$/);
+    if (dayMonthText) {
+      const rebuilt = new Date(`${dayMonthText[1]} ${dayMonthText[2]} ${dayMonthText[3]}`);
+      if (!Number.isNaN(rebuilt.getTime())) return toDateKey(rebuilt);
+    }
+  }
+
+  return null;
+}
+
+function getCurrentStreak(history) {
+  const uniqueDays = new Set(
+    history
+      .map((entry) => getEntryDateKey(entry))
+      .filter(Boolean)
+  );
+
+  const today = new Date();
+  if (!uniqueDays.has(toDateKey(today))) {
+    return 0;
+  }
+
+  let streak = 0;
+  const cursor = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+  while (uniqueDays.has(toDateKey(cursor))) {
+    streak += 1;
+    cursor.setDate(cursor.getDate() - 1);
+  }
+
+  return streak;
+}
+
+function parseDateKeyToDate(dateKey) {
+  const match = String(dateKey || "").match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match) return null;
+
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  const date = new Date(year, month - 1, day);
+
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function getDisplayStreak(history) {
+  const streakKey = getStorageKeyForCurrentUser("wellifyStreak");
+  const stored = JSON.parse(localStorage.getItem(streakKey) || "null");
+
+  if (!stored?.lastDate) {
+    return getCurrentStreak(history);
+  }
+
+  const lastDate = parseDateKeyToDate(stored.lastDate);
+  if (!lastDate) {
+    return getCurrentStreak(history);
+  }
+
+  const today = new Date();
+  const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const lastStart = new Date(lastDate.getFullYear(), lastDate.getMonth(), lastDate.getDate());
+  const diffDays = Math.floor((todayStart.getTime() - lastStart.getTime()) / 86400000);
+
+  const storedCurrent = Number(stored.current);
+  const safeCurrent = Number.isFinite(storedCurrent) && storedCurrent > 0 ? storedCurrent : 0;
+
+  // Keep streak visible on the very next day so user can continue it.
+  if (diffDays <= 1) {
+    return safeCurrent;
+  }
+
+  return 0;
+}
+
+function getDailyLatestScoreMap(history) {
+  const dailyMap = new Map();
+
+  history.forEach((entry) => {
+    const dayKey = getEntryDateKey(entry);
+    const overall = Number(entry?.overall);
+
+    if (!dayKey || !Number.isFinite(overall)) return;
+
+    const existing = dailyMap.get(dayKey);
+    const currentTs = entry?.timestamp ? new Date(entry.timestamp).getTime() : Number.NEGATIVE_INFINITY;
+    const existingTs = existing?.timestamp ? new Date(existing.timestamp).getTime() : Number.NEGATIVE_INFINITY;
+
+    if (!existing || currentTs >= existingTs) {
+      dailyMap.set(dayKey, entry);
+    }
+  });
+
+  return dailyMap;
+}
 
 function getNumericScore(entry, key) {
   const value = Number(entry?.[key]);
@@ -75,6 +198,46 @@ function getOrganisationSnapshot() {
     productivityClass,
   };
 }
+
+function getMergedHistoryForCurrentUser() {
+  const userHistoryKey = getStorageKeyForCurrentUser("wellifyHistory");
+  const userHistory = JSON.parse(localStorage.getItem(userHistoryKey) || "[]");
+
+  // Backward compatibility for older app data saved before user-scoped keys.
+  const legacyHistory = JSON.parse(localStorage.getItem("wellifyHistory") || "[]");
+
+  const userDailyKey = getStorageKeyForCurrentUser("wellifyDailyScores");
+  const userDaily = Object.values(JSON.parse(localStorage.getItem(userDailyKey) || "{}"));
+
+  const legacyDaily = Object.values(JSON.parse(localStorage.getItem("wellifyDailyScores") || "{}"));
+
+  const userScoreKey = getStorageKeyForCurrentUser("wellifyScores");
+  const userLatestScore = JSON.parse(localStorage.getItem(userScoreKey) || "null");
+  const legacyLatestScore = JSON.parse(localStorage.getItem("wellifyScores") || "null");
+
+  const merged = [
+    ...userHistory,
+    ...legacyHistory,
+    ...userDaily,
+    ...legacyDaily,
+    ...(userLatestScore ? [userLatestScore] : []),
+    ...(legacyLatestScore ? [legacyLatestScore] : []),
+  ];
+
+  const unique = [];
+  const seen = new Set();
+
+  merged.forEach((entry) => {
+    const dayKey = getEntryDateKey(entry) || "unknown-day";
+    const signature = `${dayKey}|${entry?.timestamp || ""}|${entry?.overall || ""}|${entry?.mood || ""}`;
+    if (!seen.has(signature)) {
+      seen.add(signature);
+      unique.push(entry);
+    }
+  });
+
+  return unique;
+}
  
 function BarRow({ label, pct, color }) {
   const [width, setWidth] = useState(0);
@@ -98,19 +261,10 @@ function BarRow({ label, pct, color }) {
 function WeeklyChart({ history, currentScore }) {
   const buckets = useMemo(() => {
     const today = new Date();
+    const todayDayKey = toDateKey(today);
+    const dailyMap = getDailyLatestScoreMap(history);
     const startOfWeek = new Date(today.getFullYear(), today.getMonth(), today.getDate() - today.getDay());
-    const todayKey = today.toDateString();
-    const todayDateLabel = today.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
-
-    const latestTodayEntry = [...history]
-      .reverse()
-      .find((entry) => {
-        const entryDate = entry.timestamp ? new Date(entry.timestamp) : null;
-        if (entryDate && !Number.isNaN(entryDate.getTime()) && entryDate.toDateString() === todayKey) {
-          return true;
-        }
-        return entry.date === todayDateLabel;
-      });
+    const latestTodayEntry = dailyMap.get(todayDayKey);
 
     const fallbackTodayValue = currentScore ? Math.round(currentScore.overall * 10) : 0;
 
@@ -118,18 +272,14 @@ function WeeklyChart({ history, currentScore }) {
       const dayDate = new Date(startOfWeek);
       dayDate.setDate(startOfWeek.getDate() + index);
 
-      const key = dayDate.toDateString();
-      const match = [...history]
-        .reverse()
-        .find((entry) => {
-          const entryDate = entry.timestamp ? new Date(entry.timestamp) : null;
-          return entryDate && !Number.isNaN(entryDate.getTime()) && entryDate.toDateString() === key;
-        });
+      const key = toDateKey(dayDate);
+      const match = dailyMap.get(key);
+      const isToday = key === todayDayKey;
 
       return {
         dateLabel: dayDate.toLocaleDateString("en-IN", { day: "numeric", month: "short" }),
-        value: match ? Math.round(match.overall * 10) : (dayDate.toDateString() === todayKey && latestTodayEntry ? Math.round(latestTodayEntry.overall * 10) : (dayDate.toDateString() === todayKey ? fallbackTodayValue : 0)),
-        isToday: dayDate.toDateString() === today.toDateString(),
+        value: match ? Math.round(match.overall * 10) : (isToday && latestTodayEntry ? Math.round(latestTodayEntry.overall * 10) : (isToday ? fallbackTodayValue : 0)),
+        isToday,
       };
     });
   }, [history, currentScore]);
@@ -160,6 +310,7 @@ function WeeklyChart({ history, currentScore }) {
 function MonthlyMiniChart({ history }) {
   const days = useMemo(() => {
     const today = new Date();
+    const dailyMap = getDailyLatestScoreMap(history);
     const start = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 29);
     const items = [];
 
@@ -167,19 +318,14 @@ function MonthlyMiniChart({ history }) {
       const dayDate = new Date(start);
       dayDate.setDate(start.getDate() + i);
 
-      const dayKey = dayDate.toDateString();
-      const entry = [...history]
-        .reverse()
-        .find((item) => {
-          const entryDate = item.timestamp ? new Date(item.timestamp) : null;
-          return entryDate && !Number.isNaN(entryDate.getTime()) && entryDate.toDateString() === dayKey;
-        });
+      const dayKey = toDateKey(dayDate);
+      const entry = dailyMap.get(dayKey);
 
       items.push({
         label: dayDate.getDate(),
         short: dayDate.toLocaleDateString("en-IN", { month: "short" }),
         value: entry ? Math.round(entry.overall * 10) : 0,
-        isToday: dayDate.toDateString() === today.toDateString(),
+        isToday: dayKey === toDateKey(today),
       });
     }
 
@@ -223,10 +369,19 @@ function Dashboard({ scores }) {
     overall:   "var(--amber)",
   };
  
-  const historyKey = getStorageKeyForCurrentUser("wellifyHistory");
-  const history = JSON.parse(localStorage.getItem(historyKey) || "[]");
+  const history = getMergedHistoryForCurrentUser();
+  const currentStreak = getDisplayStreak(history);
   const [showMonthly, setShowMonthly] = useState(false);
   const orgSnapshot = getOrganisationSnapshot();
+  const ayurveda = scores?.ayurveda || {
+    dominantDosha: "Unknown",
+    balanceScore: 0,
+    scores: { vata: 0, pitta: 0, kapha: 0 },
+    label: "No Ayurveda data",
+    summary: "Take an assessment to generate Ayurveda rhythm insights.",
+    routine: [],
+    note: "",
+  };
 
   const handleDownloadReport = () => {
     const user = getCurrentUser();
@@ -246,6 +401,13 @@ function Dashboard({ scores }) {
       `Emotional: ${scores.emotional}/10`,
       `Overall: ${scores.overall}/10`,
       `Mood: ${scores.mood}`,
+      "",
+      "Ayurveda Insight",
+      "----------------",
+      `Dominant dosha pattern: ${ayurveda.dominantDosha}`,
+      `Balance score: ${ayurveda.balanceScore}/100`,
+      `Vata: ${ayurveda.scores.vata} | Pitta: ${ayurveda.scores.pitta} | Kapha: ${ayurveda.scores.kapha}`,
+      ayurveda.summary ? `Summary: ${ayurveda.summary}` : "",
       "",
       "Recent History",
       "--------------",
@@ -276,7 +438,7 @@ function Dashboard({ scores }) {
  
   return (
     <>
-      <MoodBanner mood={scores.mood} />
+      <MoodBanner mood={scores.mood} streak={currentStreak} />
  
       {/* Score cards */}
       <div className="score-grid">
@@ -301,12 +463,45 @@ function Dashboard({ scores }) {
           />
         ))}
       </div>
+
+      <div className="dash-panel ayurveda-panel">
+        <h3><FiFeather aria-hidden="true" /> Ayurveda Rhythm Insight</h3>
+        <p className="ayurveda-intro">
+          {ayurveda.summary}
+        </p>
+        <div className="ayurveda-meta">
+          <div className="ayurveda-pill">Dominant: <strong>{ayurveda.dominantDosha}</strong></div>
+          <div className="ayurveda-pill">Balance score: <strong>{ayurveda.balanceScore}/100</strong></div>
+        </div>
+        <div className="ayurveda-bars">
+          {[
+            { key: "vata", label: "Vata", color: "var(--blue)" },
+            { key: "pitta", label: "Pitta", color: "var(--amber)" },
+            { key: "kapha", label: "Kapha", color: "var(--green)" },
+          ].map((item) => (
+            <BarRow
+              key={item.key}
+              label={item.label}
+              pct={Math.round(ayurveda.scores[item.key] || 0)}
+              color={item.color}
+            />
+          ))}
+        </div>
+        {Array.isArray(ayurveda.routine) && ayurveda.routine.length > 0 ? (
+          <ul className="ayurveda-routine">
+            {ayurveda.routine.map((tip) => (
+              <li key={tip}>{tip}</li>
+            ))}
+          </ul>
+        ) : null}
+        {ayurveda.note ? <p className="ayurveda-note">{ayurveda.note}</p> : null}
+      </div>
  
       {/* Org wellness */}
       <div className="dash-panel">
         <h3><FiBriefcase aria-hidden="true" /> Organisation Wellness Index</h3>
         <p style={{ fontSize: 13, color: "var(--text-2)", marginBottom: 16 }}>
-          Based on aggregated team wellness data — shows workforce health trends.
+          We provide wellness index insights for institutions like schools, colleges, and corporates using aggregated workforce health trends.
         </p>
         <div className="org-grid">
           <div className={`org-card ${orgSnapshot.teamClass}`}>
@@ -331,26 +526,26 @@ function Dashboard({ scores }) {
       <div className="dash-panel">
         <div className="progress-head">
           <h3>Weekly Progress</h3>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <button
-              className="btn-outline"
-              style={{ fontSize: 13, padding: "6px 14px" }}
-              onClick={handleDownloadReport}
-            >
-              Download Report
-            </button>
-            <button
-              type="button"
-              className={`month-toggle${showMonthly ? " active" : ""}`}
-              onClick={() => setShowMonthly((value) => !value)}
-              aria-label="Show monthly progress"
-              title="Show monthly progress"
-            >
-              <FiCalendar aria-hidden="true" />
-            </button>
-          </div>
         </div>
         <WeeklyChart history={history} currentScore={scores} />
+        <div className="progress-actions weekly-actions">
+          <button
+            className="btn-outline"
+            style={{ fontSize: 13, padding: "6px 14px" }}
+            onClick={handleDownloadReport}
+          >
+            Download Report
+          </button>
+          <button
+            type="button"
+            className={`month-toggle${showMonthly ? " active" : ""}`}
+            onClick={() => setShowMonthly((value) => !value)}
+            aria-label="Show monthly progress"
+            title="Show monthly progress"
+          >
+            <FiCalendar aria-hidden="true" />
+          </button>
+        </div>
         {showMonthly ? <MonthlyMiniChart history={history} /> : null}
       </div>
     </>

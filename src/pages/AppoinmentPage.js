@@ -197,10 +197,10 @@ function AppointmentPage() {
 
     if (!cleanName) {
       nextErrors.name = "Invalid name: name is required.";
-    } else if (!/^[A-Za-z][A-Za-z\s.'-]{1,49}$/.test(cleanName)) {
-      nextErrors.name = "Invalid name: use letters and spaces only.";
     } else if (user?.name && cleanName.toLowerCase() !== user.name.trim().toLowerCase()) {
       nextErrors.name = `Invalid name: name should match your account name (${user.name}).`;
+    } else if (!/^[A-Za-z0-9][A-Za-z0-9\s._'-]{1,49}$/.test(cleanName)) {
+      nextErrors.name = "Invalid name: use letters, numbers, spaces, or . _ ' -";
     }
 
     if (!cleanEmail) {

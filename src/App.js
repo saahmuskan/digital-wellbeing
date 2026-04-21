@@ -4,7 +4,7 @@ import Home from "./pages/Home";
 import AssessmentPage from "./pages/AssessmentPage";
 import DashboardPage from "./pages/DashboardPage";
 import AppointmentPage from "./pages/AppoinmentPage";
-import BlogPage from "./pages/Blogpage";
+import ReminderPage from "./pages/Blogpage";
 import ProfilePage from "./pages/ProfilePage";
 import LoginPage from "./pages/LoginPage";
 import SignInPage from "./pages/SignInPage";
@@ -12,6 +12,7 @@ import AdminUsersPage from "./pages/AdminUsersPage";
 import AdminBookedSlotsPage from "./pages/AdminBookedSlotsPage";
 import Navbar from "./components/Navbar";
 import Chatbot from "./components/Chatbot";
+import ReminderWatcher from "./components/ReminderWatcher";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { isAdminRole } from "./utils/auth";
 import { applyTheme, getSavedTheme } from "./utils/themes";
@@ -61,12 +62,13 @@ function AppShell() {
         <Route path="/assessment" element={<ProtectedRoute><AssessmentPage /></ProtectedRoute>} />
         <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
         <Route path="/appointment" element={<ProtectedRoute><AppointmentPage /></ProtectedRoute>} />
-        <Route path="/blog" element={<ProtectedRoute><BlogPage /></ProtectedRoute>} />
+        <Route path="/blog" element={<ProtectedRoute><ReminderPage /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
         <Route path="/admin/users" element={<AdminRoute><AdminUsersPage /></AdminRoute>} />
         <Route path="/admin/booked-slots" element={<AdminRoute><AdminBookedSlotsPage /></AdminRoute>} />
         <Route path="*" element={<Navigate to={user ? "/" : "/login"} replace />} />
       </Routes>
+      {user ? <ReminderWatcher /> : null}
       {user ? <Chatbot /> : null}
     </div>
   );

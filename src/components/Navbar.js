@@ -22,7 +22,7 @@ const links = [
   { to: "/assessment", label: "Assessment", icon: FiClipboard },
   { to: "/dashboard", label: "Dashboard", icon: FiBarChart2 },
   { to: "/appointment", label: "Book", icon: FiCalendar },
-  { to: "/blog", label: "Blog", icon: FiBookOpen },
+  { to: "/blog", label: "Reminder", icon: FiBookOpen },
   { to: "/profile", label: "Profile", icon: FiUser },
 ];
 

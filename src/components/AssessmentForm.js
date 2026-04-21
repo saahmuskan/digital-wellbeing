@@ -11,6 +11,40 @@ const MOODS = [
   { key: "Anxious", Icon: FiAlertCircle },
   { key: "Sad", Icon: FiFrown },
 ];
+
+function toDateKey(date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+function getUpdatedStreak(previous, assessedAt) {
+  const todayKey = toDateKey(assessedAt);
+  const yesterday = new Date(assessedAt);
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayKey = toDateKey(yesterday);
+
+  const prevCurrent = Number(previous?.current);
+  const safePrevCurrent = Number.isFinite(prevCurrent) && prevCurrent > 0 ? prevCurrent : 0;
+
+  let current = 1;
+  if (previous?.lastDate === todayKey) {
+    current = Math.max(1, safePrevCurrent);
+  } else if (previous?.lastDate === yesterdayKey) {
+    current = safePrevCurrent + 1;
+  }
+
+  const prevBest = Number(previous?.best);
+  const safePrevBest = Number.isFinite(prevBest) && prevBest > 0 ? prevBest : 0;
+
+  return {
+    current,
+    best: Math.max(current, safePrevBest),
+    lastDate: todayKey,
+    updatedAt: assessedAt.toISOString(),
+  };
+}
  
 function AssessmentForm() {
   const navigate = useNavigate();
@@ -61,7 +95,17 @@ function AssessmentForm() {
     const historyKey = getStorageKeyForCurrentUser("wellifyHistory");
     const history = JSON.parse(localStorage.getItem(historyKey) || "[]");
     history.unshift(scoredEntry);
-    localStorage.setItem(historyKey, JSON.stringify(history.slice(0, 7)));
+    localStorage.setItem(historyKey, JSON.stringify(history.slice(0, 180)));
+
+    const dailyKey = getStorageKeyForCurrentUser("wellifyDailyScores");
+    const daily = JSON.parse(localStorage.getItem(dailyKey) || "{}");
+    daily[toDateKey(assessedAt)] = scoredEntry;
+    localStorage.setItem(dailyKey, JSON.stringify(daily));
+
+    const streakKey = getStorageKeyForCurrentUser("wellifyStreak");
+    const previousStreak = JSON.parse(localStorage.getItem(streakKey) || "null");
+    const nextStreak = getUpdatedStreak(previousStreak, assessedAt);
+    localStorage.setItem(streakKey, JSON.stringify(nextStreak));
  
     navigate("/dashboard");
   };
