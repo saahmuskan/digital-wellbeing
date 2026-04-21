@@ -120,6 +120,41 @@ function buildSmartSuggestions(scores, moodTrend, streakSnapshot) {
   const seen = new Set();
   const dominantDosha = scores?.ayurveda?.dominantDosha;
 
+  const baselineSuggestions = [
+    {
+      category: "Focus",
+      title: "Morning planning reminder",
+      time: "08:30",
+      repeat: "Daily",
+      note: "Pick one priority before the day gets noisy.",
+      reason: "A stable default that helps structure the day.",
+    },
+    {
+      category: "Sleep",
+      title: "Evening wind-down",
+      time: "22:00",
+      repeat: "Daily",
+      note: "Close the day with a calmer routine.",
+      reason: "A reliable habit to reduce late-night stress.",
+    },
+    {
+      category: "Hydration",
+      title: "Midday water break",
+      time: "13:30",
+      repeat: "Daily",
+      note: "Pause for water before energy dips in the afternoon.",
+      reason: "Simple support that benefits focus and physical energy.",
+    },
+    {
+      category: "Break",
+      title: "Post-lunch reset",
+      time: "15:30",
+      repeat: "Daily",
+      note: "Take a short screen pause and reset attention.",
+      reason: "A gentle reset improves consistency through the day.",
+    },
+  ];
+
   const addSuggestion = (item) => {
     const key = `${item.category}|${item.title}`;
     if (seen.has(key)) return;
@@ -128,24 +163,7 @@ function buildSmartSuggestions(scores, moodTrend, streakSnapshot) {
   };
 
   if (!scores) {
-    return [
-      {
-        category: "Focus",
-        title: "Morning planning reminder",
-        time: "08:30",
-        repeat: "Daily",
-        note: "Pick one priority before the day gets noisy.",
-        reason: "No assessment found yet, so this is a safe default.",
-      },
-      {
-        category: "Sleep",
-        title: "Evening wind-down",
-        time: "22:00",
-        repeat: "Daily",
-        note: "Close the day with a calmer routine.",
-        reason: "A reliable habit to start with.",
-      },
-    ];
+    return baselineSuggestions;
   }
 
   if (scores.physical < 7) {
@@ -277,6 +295,10 @@ function buildSmartSuggestions(scores, moodTrend, streakSnapshot) {
     });
   }
 
+  if (suggestions.length < 4) {
+    baselineSuggestions.forEach((item) => addSuggestion(item));
+  }
+
   return suggestions.slice(0, 5);
 }
 
@@ -321,6 +343,7 @@ function ReminderPage() {
   const moodTrend = getMoodTrend(recentAssessments);
   const streakSnapshot = getStreakSnapshot();
   const smartSuggestions = buildSmartSuggestions(latestAssessment, moodTrend, streakSnapshot);
+  const visibleSuggestions = smartSuggestions.slice(0, 4);
 
   const completion = getCompletion(reminders);
   const activeReminders = sortByTime(reminders.filter((item) => !item.done));
@@ -554,11 +577,10 @@ function ReminderPage() {
               <span className="reminder-mini-label">Smart touch</span>
               <h3>Auto suggestions from your wellness data</h3>
             </div>
-            <span className="reminder-panel-sub">Assessment + mood trend + streak + Ayurveda signal</span>
           </div>
 
           <div className="reminder-suggestion-list">
-            {smartSuggestions.map((suggestion) => {
+            {visibleSuggestions.map((suggestion) => {
               const category = CATEGORY_OPTIONS.find((item) => item.key === suggestion.category) || CATEGORY_OPTIONS[0];
               const Icon = category.icon;
 
